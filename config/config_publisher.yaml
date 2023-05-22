@@ -1,0 +1,35 @@
+publisher:
+  address: '8.8.8.4' # Local address
+  host: '8.8.8.5' # Target address
+  port: 10000
+  
+  topics:
+    float_example:
+      topic: "/send_udp/float" 
+      type: "std_msgs.msg.Float64"
+      port: 10006
+      protocol: "tcp"
+
+    string_tcp: 
+      topic: "/send_tcp/string"
+      type: "std_msgs.msg.String"
+      port: 10005
+      protocol: "tcp"
+
+    string_udp:
+      topic: "/send_udp/string"
+      type: "std_msgs.msg.String"
+      port: 10004
+      protocol: "udp"
+
+    image_compressed:
+      topic: "/webcam/image_raw/compressed"
+      type: "sensor_msgs.msg.CompressedImage"
+      port: 10012
+
+    odom_example:
+      topic: "/send_udp/Odometry"
+      type: "nav_msgs.msg.Odometry"
+      port: 10009
+    
+

@@ -1,0 +1,8 @@
+service_server:
+  address: '8.8.8.4' # Local address
+  
+  services:
+    string_example:
+      service: "/girona1000/controller/disable_thrusters"
+      type: "std_srvs.srv.Trigger"
+      port: 20003
