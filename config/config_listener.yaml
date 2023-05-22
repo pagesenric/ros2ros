@@ -1,0 +1,18 @@
+listener:
+  address: '8.8.8.4' # Local address
+  
+  topics:
+    string_tcp: # Echo these topics for testing!
+      topic: "/read/string"
+      type: "std_msgs.msg.String"
+      port: 10005
+      protocol: "tcp"
+    string_udp:
+      topic: "/read/string"
+      type: "std_msgs.msg.String"
+      port: 10004
+      protocol: "udp"
+    float_example:
+      topic: "/read_udp/float"
+      type: "std_msgs.msg.Float64"
+      port: 10006

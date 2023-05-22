@@ -1,0 +1,6 @@
+<launch>
+    <rosparam command="load" file="$(find ros2ros)/config/config_tcp_client.yaml" />
+    <rosparam command="load" file="$(find ros2ros)/config/config_tcp_service.yaml" />
+    <node name="service_serviceside" pkg="ros2ros" type="tcp_service.py" output="screen"/>
+    <node name="service_clientside" pkg="ros2ros" type="tcp_client.py" output="screen"/>
+</launch>

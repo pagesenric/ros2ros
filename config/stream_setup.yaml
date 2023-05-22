@@ -1,0 +1,14 @@
+# Set up your streams to rtsp here.
+
+# Each stream will be accessable at rtsp://localhost:port/mountpoint
+
+port: "8554"
+streams:
+
+  stream-1:
+    type: topic
+    source: /videofile/image_raw # Image rostopic. It must be raw image! Don't use transport topics!
+    mountpoint: /back 
+    caps: video/x-raw,framerate=10/1,width=640,height=480 # Constraints of the video stream
+    bitrate: 500 # Target bitrate of the stream
+

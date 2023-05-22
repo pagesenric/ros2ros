@@ -1,0 +1,8 @@
+service_client:
+  address: '8.8.8.5' # Target address
+  
+  services:
+    string_example:
+      service: "/disable_thrusters"
+      type: "std_srvs.srv.Trigger"
+      port: 20003
