@@ -15,24 +15,6 @@ BUFFER_SIZE = 65536
 # FUNCTION DEFINITIONS -------------------------------------------------------------------------------------------------
 ########################################################################################################################
 
-def deserialize_and_publish(data, publisher, msg_type, socket):
-    """
-    Function to deserialize data and publish it with the referenced publisher.
-    Pre:
-        - Parameter data must be seralizde data.
-        - Parameter publisher must be a ROS publisher that publishes messages of the class msg_type.
-        - Parameter msg_type must be a valid message class.
-        - Parameter socket should be the socket where the data was retrived from.
-    Post:
-        - The data is deserialized and published through the publisher, if possible.
-    """
-    msg = msg_type()
-    try:
-        msg.deserialize(data)
-        publisher.publish(msg)    
-    except:
-        rospy.logwarn("Couldn't deserialize the data recived from " + str(socket.getsockname()))
-
 def thread_republish_udp(address, topic_port, publisher, msg_type):
     """
     Thread target function to deserialize recived UDP packets and publish the data to the specified topic.
@@ -57,7 +39,13 @@ def thread_republish_udp(address, topic_port, publisher, msg_type):
         rospy.loginfo("Recived data (" +str(len(data)) + ") from " + str(s.getsockname()) + " through UDP")
 
         # Process data
-        deserialize_and_publish(data, pub, msg_type, s)
+        msg = msg_type()
+        try:
+            msg.deserialize(data)
+            print(msg)
+            publisher.publish(msg)    
+        except:
+            rospy.logwarn("Couldn't deserialize the data recived from " + str(socket.getsockname()))
 
 def thread_republish_tcp(address, topic_port, publisher, msg_type):
     """
@@ -73,23 +61,34 @@ def thread_republish_tcp(address, topic_port, publisher, msg_type):
     """
     # TCP socket that we bind to the address and port
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind((address, topic_port))
 
-    rospy.loginfo("Starting TCP thread for topic " + publisher.name + ", msg type: " + str(msg_type) + ", port: " + str(topic_port))
-
-    # Listen for incoming conneciton
-    s.listen(1)
-    conn, addr = s.accept()
-
-    rospy.loginfo("Connection for topic " + publisher.name + " from " + str(addr) + " stablished!")
-
     while True:
-        # Wait for data
-        data = conn.recv(BUFFER_SIZE)
-        rospy.loginfo("Recived data (" +str(len(data)) + ") from " + str(s.getsockname()) + " through TCP")
+        rospy.loginfo("Starting TCP thread for topic " + publisher.name + ", msg type: " + str(msg_type) + ", port: " + str(topic_port))
+        # Listen for incoming conneciton
+        s.listen(1)
+        conn, addr = s.accept()
+
+        rospy.loginfo("Connection for topic " + publisher.name + " from " + str(addr) + " stablished!")
+        data = 1
+        while data:
+            # Wait for data
+            data = conn.recv(BUFFER_SIZE)
+            
+            if data:
+                rospy.loginfo("Recived data (" +str(len(data)) + ") from " + str(s.getsockname()) + " through TCP")
+                
+                # Process data
+                msg = msg_type()
+                try:
+                    msg.deserialize(data)
+                    print(msg)
+                    publisher.publish(msg)    
+                except:
+                    rospy.logwarn("Couldn't deserialize the data recived from " + str(socket.getsockname()))
         
-        # Process data
-        deserialize_and_publish(data, pub, msg_type, s)
+        rospy.loginfo("Connection for topic " + publisher.name + " from " + str(addr) + " lost...")
 
 def thread_republish_rtsp(address, publisher, encoding = "bgr8"):
     """
