@@ -4,16 +4,30 @@ import rospy
 from pydoc import locate
 import threading
 import cv2
-from cv_bridge import CvBridge
+from sensor_msgs.msg import Image
+import os
+import time
+#from cv_bridge import CvBridge
 ########################################################################################################################
 # CONSTANTS ----------------------------------------------------------------------------------------------------------
 ########################################################################################################################
 
 BUFFER_SIZE = 65536
+WAIT_TIME = 5
 
 ########################################################################################################################
 # FUNCTION DEFINITIONS -------------------------------------------------------------------------------------------------
 ########################################################################################################################
+
+def cv2_to_imgmsg(cv_image):
+    img_msg = Image()
+    img_msg.height = cv_image.shape[0]
+    img_msg.width = cv_image.shape[1]
+    img_msg.encoding = "bgr8"
+    img_msg.is_bigendian = 0
+    img_msg.data = cv_image.tostring()
+    img_msg.step = len(img_msg.data) // img_msg.height # That double line is actually integer division, not a comment
+    return img_msg
 
 def thread_republish_udp(address, topic_port, publisher, msg_type):
     """
@@ -91,30 +105,50 @@ def thread_republish_tcp(address, topic_port, publisher, msg_type):
         
         rospy.loginfo("Connection for topic " + publisher.name + " from " + str(addr) + " lost...")
 
-def thread_republish_rtsp(address, publisher, encoding = "bgr8"):
+def thread_republish_rtsp(address, publisher):
     """
     Thread target function to read an image RTSP stream and publish it as a ROS topic.
 
     Pre:
         - Parameter address must be a valid video-only RTSP stream url.
         - Parameter publisher must be a publisher that publishes sensor_msgs/Image type messages.
-        - Parameter encoding must be the encodign used by the RTSP stream.
     Post:
         - The frames recived from the RTSP stream are published by the referenced publisher.
     """
+    # Set FFMPEG capture options
+    os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "rtsp_transport;udp"
     # Open video capture from the address
-    cap = cv2.VideoCapture(address)
+    connected = False
+    wait_time = WAIT_TIME
+    while True:
+        cap = cv2.VideoCapture(address, cv2.CAP_FFMPEG)
+        while(cap.isOpened()):
+            if not connected:
+                rospy.loginfo("Reading stream from " + address)
+                connected = True
+            try:
+                # Read frame of the video
+                ret, frame = cap.read()
 
-    while(cap.isOpened()):
-        # Read frame of the video
-        ret, frame = cap.read()
-        
-        # Convert frame to sensor_msgs/Image message
-        bridge = CvBridge()
-        frame = bridge.cv2_to_imgmsg(frame, encoding)
+                # Convert frame to sensor_msgs/Image message
+                #bridge = CvBridge()
+                #frame = bridge.cv2_to_imgmsg(frame, encoding)
+                frame = cv2_to_imgmsg(frame)
 
-        # Publish the frame
-        publisher.publish(frame)
+                # Publish the frame
+                publisher.publish(frame)
+            except:
+                cap.release()
+        if not connected:
+            rospy.logwarn("Couldn't connect to " + address + ". Reattempting in " + str(wait_time) + " seconds")
+            time.sleep(wait_time)
+            wait_time += 3
+        else:
+            connected = False
+            wait_time = WAIT_TIME
+            rospy.logwarn("RTSP stream from url " + address + " closed. Reattempting connection")
+
+    
 
 ########################################################################################################################
 # MAIN CODE -----------------------------------------------------------------------------------------------------------
@@ -160,9 +194,9 @@ if (rospy.has_param('receiver/topics')):
         elif protocol == 'rtsp' or protocol == 'RTSP':
             if rospy.has_param('receiver/topics/' + topic + '/rtsp_url'):
                 rtsp_url = rospy.get_param('receiver/topics/' + topic + '/rtsp_url')
-                threads.append(threading.Thread(target=thread_republish_rtsp, args=(rtsp_url, pub, locate(topic_type))))
+                threads.append(threading.Thread(target=thread_republish_rtsp, args=(rtsp_url, pub)))
             else:
-                raise Exception("RTSP stream has no URL")
+                rospy.logerr("RTSP stream has no URL")
         elif protocol == 'tcp' or protocol == 'TCP':
             threads.append(threading.Thread(target=thread_republish_tcp, args=(address, topic_port,pub, locate(topic_type))))
         else:
