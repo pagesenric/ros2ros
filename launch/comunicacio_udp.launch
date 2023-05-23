@@ -1,6 +1,0 @@
-<launch>
-    <rosparam command="load" file="$(find ros2ros)/config/config_udp_listener.yaml" />
-    <rosparam command="load" file="$(find ros2ros)/config/config_udp_publisher.yaml" />
-    <node name="topic_listener" pkg="ros2ros" type="udp_listener.py" output="screen"/>
-    <node name="topic_publisher" pkg="ros2ros" type="udp_publisher.py" output="screen"/>
-</launch>

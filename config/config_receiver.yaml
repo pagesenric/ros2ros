@@ -1,4 +1,4 @@
-listener:
+receiver:
   address: '8.8.8.4' # Local address
   
   topics:

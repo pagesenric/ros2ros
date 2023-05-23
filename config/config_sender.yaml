@@ -1,4 +1,4 @@
-publisher:
+sender:
   address: '8.8.8.4' # Local address
   host: '8.8.8.5' # Target address
   port: 10000

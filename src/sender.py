@@ -127,8 +127,9 @@ def thread_publish_tcp(topic_name, topic_type, host, port):
             s.connect((host, port))
             connected = True
         except Exception as e:
-            rospy.loginfo("[TCP sender] Failed to connect to " + str(host) + ':' + str(port) + '. Reattempting in ' + wait_time + ' seconds...')
-            time.sleep(5)
+            rospy.logwarn("[TCP sender] Failed to connect to " + str(host) + ':' + str(port) + '. Reattempting in ' + str(wait_time) + ' seconds...')
+            time.sleep(wait_time)
+            wait_time += 3
 
     # Once connected, we can initialize the subscriber
     rospy.loginfo("[TCP sender] Connection to " + str(host) + ':' + str(port) + ' successful!')

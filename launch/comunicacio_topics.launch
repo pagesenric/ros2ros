@@ -1,7 +1,12 @@
 <launch>
-    <rosparam command="load" file="$(find ros2ros)/config/config_listener.yaml" />
-    <rosparam command="load" file="$(find ros2ros)/config/config_publisher.yaml" />
-    <node name="topic_listener" pkg="ros2ros" type="listener.py" output="screen"/>
-    <node name="topic_publisher" pkg="ros2ros" type="publisher.py" output="screen"/>
+    <!-- Load the sender/receiver parameters -->
+    <rosparam command="load" file="$(find ros2ros)/config/config_receiver.yaml" />
+    <rosparam command="load" file="$(find ros2ros)/config/config_sender.yaml" />
+
+    <!-- Start the reciver and sender nodes -->
+    <node name="topic_listener" pkg="ros2ros" type="receiver.py" output="screen"/>
+    <node name="topic_publisher" pkg="ros2ros" type="sender.py" output="screen"/>
+
+    <!-- Start the rtsp node -->
     <include file="$(find ros2ros)/launch/rtsp_streams.launch"/>
 </launch>

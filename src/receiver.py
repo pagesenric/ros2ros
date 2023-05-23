@@ -37,7 +37,7 @@ def thread_republish_udp(address, topic_port, publisher, msg_type):
     """
     Thread target function to deserialize recived UDP packets and publish the data to the specified topic.
     Pre:
-        - Parameter address must be the reciver's address.
+        - Parameter address must be the receiver's address.
         - Parameter publisher must be a ROS publisher that publishes messages of the class 
           specified by the parameter msg_type.
     Post:
@@ -49,7 +49,7 @@ def thread_republish_udp(address, topic_port, publisher, msg_type):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.bind((address, topic_port))
     
-    rospy.loginfo("Starting UDP thread for topic " + publisher.name, ", msg type: " + str(msg_type), ", port: " + str(topic_port))
+    rospy.loginfo("Starting UDP thread for topic " + publisher.name + ", msg type: " + str(msg_type) + ", port: " + str(topic_port))
     
     while True:
         # Wait for data
@@ -63,7 +63,7 @@ def thread_republish_tcp(address, topic_port, publisher, msg_type):
     """
     Thread target function to accept a TCP connection packets and publish the data recived to the specified topic.
     Pre:
-        - Parameter address must be the reciver's address.
+        - Parameter address must be the receiver's address.
         - Parameter publisher must be a ROS publisher that publishes messages of the class 
           specified by the parameter msg_type.
     Post:
@@ -75,7 +75,7 @@ def thread_republish_tcp(address, topic_port, publisher, msg_type):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((address, topic_port))
 
-    rospy.loginfo("Starting TCP thread for topic " + publisher.name, ", msg type: " + str(msg_type), ", port: " + str(topic_port))
+    rospy.loginfo("Starting TCP thread for topic " + publisher.name + ", msg type: " + str(msg_type) + ", port: " + str(topic_port))
 
     # Listen for incoming conneciton
     s.listen(1)
@@ -120,34 +120,34 @@ def thread_republish_rtsp(address, publisher, encoding = "bgr8"):
 # MAIN CODE -----------------------------------------------------------------------------------------------------------
 ########################################################################################################################
 
-rospy.init_node('ros2ros_reciver')
+rospy.init_node('ros2ros_receiver')
 
 address = ""
 threads = []
 
 # We obtain the local address that will recive the connections
-if (rospy.has_param('reciver/address')):
-    address = rospy.get_param('reciver/address')
+if (rospy.has_param('receiver/address')):
+    address = rospy.get_param('receiver/address')
 else:
-    raise Exception("The parameter 'reciver/address' is not set")
+    raise Exception("The parameter 'receiver/address' is not set")
 
 # We go through each specified topic to listen.
-if (rospy.has_param('reciver/topics')):
-    topics = rospy.get_param('reciver/topics')
+if (rospy.has_param('receiver/topics')):
+    topics = rospy.get_param('receiver/topics')
 
     # Check if every element has a key 'topic', 'type' and 'port'
     for topic in topics:
         rospy.loginfo("Initializing topic " + topic)
-        if not (rospy.has_param('reciver/topics/'+ topic + '/topic') and rospy.has_param('reciver/topics/'+ topic + '/type') and rospy.has_param('reciver/topics/'+ topic + '/port')):
+        if not (rospy.has_param('receiver/topics/'+ topic + '/topic') and rospy.has_param('receiver/topics/'+ topic + '/type') and rospy.has_param('receiver/topics/'+ topic + '/port')):
             raise Exception("Every element of the 'topics' parameter must have a 'topic' and a 'type' key")
-        topic_name = rospy.get_param('reciver/topics/'+ topic + '/topic')
-        topic_port = rospy.get_param('reciver/topics/'+ topic + '/port')
-        topic_type = rospy.get_param('reciver/topics/'+ topic + '/type')
+        topic_name = rospy.get_param('receiver/topics/'+ topic + '/topic')
+        topic_port = rospy.get_param('receiver/topics/'+ topic + '/port')
+        topic_type = rospy.get_param('receiver/topics/'+ topic + '/type')
         
         # We check if another protocol is required
         # By default we send the data through UDP
-        if rospy.has_param('reciver/topics/' + topic + '/protocol'):
-            protocol = rospy.get_param('reciver/topics/'+ topic + '/protocol')
+        if rospy.has_param('receiver/topics/' + topic + '/protocol'):
+            protocol = rospy.get_param('receiver/topics/'+ topic + '/protocol')
         else:
             protocol = 'udp'
               
@@ -158,8 +158,8 @@ if (rospy.has_param('reciver/topics')):
         if protocol == 'udp' or protocol == 'UDP':
             threads.append(threading.Thread(target=thread_republish_udp, args=(address, topic_port, pub, locate(topic_type))))
         elif protocol == 'rtsp' or protocol == 'RTSP':
-            if rospy.has_param('reciver/topics/' + topic + '/rtsp_url'):
-                rtsp_url = rospy.get_param('reciver/topics/' + topic + '/rtsp_url')
+            if rospy.has_param('receiver/topics/' + topic + '/rtsp_url'):
+                rtsp_url = rospy.get_param('receiver/topics/' + topic + '/rtsp_url')
                 threads.append(threading.Thread(target=thread_republish_rtsp, args=(rtsp_url, pub, locate(topic_type))))
             else:
                 raise Exception("RTSP stream has no URL")
