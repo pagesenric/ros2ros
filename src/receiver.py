@@ -29,6 +29,7 @@ def thread_republish_udp(address, topic_port, publisher, msg_type):
     
     # UDP socket that we bind to the address and port
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind((address, topic_port))
     
     rospy.loginfo("Starting UDP thread for topic " + publisher.name + ", msg type: " + str(msg_type) + ", port: " + str(topic_port))

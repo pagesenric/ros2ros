@@ -97,6 +97,7 @@ def thread_publish_udp(topic_name, topic_type, host, port):
         - Returns nothing.
     """
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     rospy.logdebug("[UDP sender] Starting thread for " + topic_name)
     rospy.Subscriber(topic_name, topic_type, helper_callback_udp(host, port, s))
 
@@ -116,6 +117,7 @@ def thread_publish_tcp(topic_name, topic_type, host, port):
         - Returns nothing.
     """
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     rospy.logdebug("[TCP sender] Starting thread for " + topic_name)
     
     # We try to connect to the reciver
