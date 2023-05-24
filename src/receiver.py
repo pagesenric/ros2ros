@@ -12,7 +12,7 @@ import time
 # CONSTANTS ----------------------------------------------------------------------------------------------------------
 ########################################################################################################################
 
-BUFFER_SIZE = 65536
+BUFFER_SIZE = 655360
 WAIT_TIME = 5
 
 ########################################################################################################################
@@ -60,7 +60,7 @@ def thread_republish_udp(address, topic_port, publisher, msg_type):
             print(msg)
             publisher.publish(msg)    
         except:
-            rospy.logwarn("[UDP Receiver] Couldn't deserialize the data recived from " + str(socket.getsockname()))
+            rospy.logwarn("[UDP Receiver] Couldn't deserialize the data recived from " + str(s.getsockname()))
 
 def thread_republish_tcp(address, topic_port, publisher, msg_type):
     """
@@ -96,12 +96,12 @@ def thread_republish_tcp(address, topic_port, publisher, msg_type):
                 
                 # Process data
                 msg = msg_type()
-                try:
-                    msg.deserialize(data)
-                    print(msg)
-                    publisher.publish(msg)    
-                except:
-                    rospy.logwarn("Couldn't deserialize the data recived from " + str(socket.getsockname()))
+                # try:
+                msg.deserialize(data)
+                # print(msg)
+                publisher.publish(msg)    
+                # except:
+                #     rospy.logwarn("Couldn't deserialize the data recived from " + str(s.getsockname()))
         
         rospy.loginfo("Connection for topic " + publisher.name + " from " + str(addr) + " lost...")
 
