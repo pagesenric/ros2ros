@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 # Creator: Enric Pagès Agustí
 # University of Girona
@@ -31,7 +31,7 @@ def callback_udp(data, host, port, socket):
     buff = BytesIO()
     data.serialize(buff)         
     
-    print("Sending data (" +str(len(buff.getvalue())) + ") to " + str(host) + ":" + str(port) + " through UDP")
+    rospy.loginfo("[UDP Sender] Sending data (" +str(len(buff.getvalue())) + ") to " + str(host) + ":" + str(port) + " through UDP")
     # Data is sent
     socket.sendto(buff.getvalue(), (host, port))
 
@@ -52,7 +52,7 @@ def callback_tcp(data, socket):
     data.serialize(buff)         
     
     # Data is sent
-    print("Sending data (" +str(len(buff.getvalue())) + ") to " + str(socket) + " through TCP")
+    rospy.loginfo("[TCP Sender] Sending data (" +str(len(buff.getvalue())) + ") to " + str(socket) + " through TCP")
     socket.sendall(buff.getvalue())
 
 
@@ -162,7 +162,7 @@ if (rospy.has_param('sender/topics')):
     
     #check if every element has a key 'topic', 'type' and 'port'
     for topic in topics:
-        rospy.loginfo("Initializing topic " + topic)
+        rospy.loginfo("[Sender] Initializing topic " + topic)
         if not (rospy.has_param('sender/topics/'+ topic + '/topic') and rospy.has_param('sender/topics/'+ topic + '/type') and rospy.has_param('sender/topics/'+ topic + '/port')):
             raise Exception("Every element of the 'topics' parameter must have a 'topic' and a 'type' key")
         topic_name = rospy.get_param('sender/topics/'+ topic + '/topic')
@@ -187,8 +187,8 @@ if (rospy.has_param('sender/topics')):
         # start the thread
         threads[-1].daemon = True
         threads[-1].start()                            
-    rospy.loginfo("Sender initialized")
+    rospy.loginfo("[Sender] Sender initialized")
 else:
-    raise Exception("The parameter 'topics' is not set")
+    rospy.logerr("[Sender] The parameter 'topics' is not set")
 
 rospy.spin()

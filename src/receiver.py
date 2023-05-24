@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 import socket
 import rospy
 from pydoc import locate
@@ -51,7 +51,7 @@ def thread_republish_udp(address, topic_port, publisher, msg_type):
     while True:
         # Wait for data
         data, addr = s.recvfrom(BUFFER_SIZE)
-        rospy.loginfo("Recived data (" +str(len(data)) + ") from " + str(s.getsockname()) + " through UDP")
+        rospy.loginfo("[UDP Receiver] Recived data (" +str(len(data)) + ") from " + str(s.getsockname()) + " through UDP")
 
         # Process data
         msg = msg_type()
@@ -60,7 +60,7 @@ def thread_republish_udp(address, topic_port, publisher, msg_type):
             print(msg)
             publisher.publish(msg)    
         except:
-            rospy.logwarn("Couldn't deserialize the data recived from " + str(socket.getsockname()))
+            rospy.logwarn("[UDP Receiver] Couldn't deserialize the data recived from " + str(socket.getsockname()))
 
 def thread_republish_tcp(address, topic_port, publisher, msg_type):
     """
@@ -80,12 +80,12 @@ def thread_republish_tcp(address, topic_port, publisher, msg_type):
     s.bind((address, topic_port))
 
     while True:
-        rospy.loginfo("Starting TCP thread for topic " + publisher.name + ", msg type: " + str(msg_type) + ", port: " + str(topic_port))
+        rospy.loginfo("[TCP Receiver] Starting TCP thread for topic " + publisher.name + ", msg type: " + str(msg_type) + ", port: " + str(topic_port))
         # Listen for incoming conneciton
         s.listen(1)
         conn, addr = s.accept()
 
-        rospy.loginfo("Connection for topic " + publisher.name + " from " + str(addr) + " stablished!")
+        rospy.loginfo("[TCP Receiver] onnection for topic " + publisher.name + " from " + str(addr) + " stablished!")
         data = 1
         while data:
             # Wait for data
@@ -171,7 +171,7 @@ if (rospy.has_param('receiver/topics')):
 
     # Check if every element has a key 'topic', 'type' and 'port'
     for topic in topics:
-        rospy.loginfo("Initializing topic " + topic)
+        rospy.loginfo("[Receiver] Initializing topic " + topic)
         if not (rospy.has_param('receiver/topics/'+ topic + '/topic') and rospy.has_param('receiver/topics/'+ topic + '/type') and rospy.has_param('receiver/topics/'+ topic + '/port')):
             raise Exception("Every element of the 'topics' parameter must have a 'topic' and a 'type' key")
         topic_name = rospy.get_param('receiver/topics/'+ topic + '/topic')
@@ -205,8 +205,9 @@ if (rospy.has_param('receiver/topics')):
         threads[-1].daemon = True
         threads[-1].start()
 
-    rospy.loginfo("Initialized " + str(len(topics)) + " topics")
+    rospy.loginfo("[Receiver] Initialized " + str(len(topics)) + " topics")
 else:
-    raise Exception("The parameter 'topics' is not set")
+    rospy.logerr("[Receiver] The parameter 'topics' is not set")
+
 
 rospy.spin()
