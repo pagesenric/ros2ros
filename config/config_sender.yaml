@@ -1,8 +1,6 @@
 sender:
-  address: '8.8.8.4' # Local address
   host: '8.8.8.5' # Target address
-  port: 10000
-  
+    
   topics:
     float_example:
       topic: "/send_udp/float" 
@@ -31,5 +29,3 @@ sender:
       topic: "/send_udp/Odometry"
       type: "nav_msgs.msg.Odometry"
       port: 10009
-    
-

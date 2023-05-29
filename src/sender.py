@@ -146,15 +146,13 @@ rospy.init_node('ros2ros_sender')
 
 threads = []
 
-# We obtain the sender's address, port, and the target connection's host name
-address = ("", 0)
+# We obtain the target connection's host name
 host = ""
 
-if (rospy.has_param('sender/address') and rospy.has_param('sender/port') and rospy.has_param('sender/host')):
-    address = rospy.get_param('sender/address')
+if rospy.has_param('sender/address'):
     host = rospy.get_param('sender/host')
 else:
-    raise Exception("The parameters 'sender/address' and 'sender/port' are not set")
+    raise Exception("The parameter 'sender/host' is not set")
 
 # We go through each specified topic to publish
 if (rospy.has_param('sender/topics')):
