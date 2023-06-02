@@ -125,7 +125,7 @@ Everything must be under the label "service_client".
 The file should follow this pattern:
 ```
 service_client:
-  address: 'xxx.xxx.xxx.xxx' # Local address
+  address: 'xxx.xxx.xxx.xxx' # Target address
   
   services:
     example_topic:
